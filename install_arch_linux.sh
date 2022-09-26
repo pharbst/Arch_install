@@ -6,7 +6,7 @@
 #    By: pharbst <pharbst@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/18 19:09:13 by pharbst           #+#    #+#              #
-#    Updated: 2022/09/26 04:56:32 by pharbst          ###   ########.fr        #
+#    Updated: 2022/09/26 05:18:18 by pharbst          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -104,9 +104,9 @@ cat /mnt/etc/fstab
 pacstrap -i /mnt base << EOF
 
 EOF
-sed -i "s/^EFI=.*/EFI=$EFI/" install_arch_linux2.sh
-sed -i "s/^DRIVE=.*/DRIVE=$DRIVE/" install_arch_linux2.sh
-sed -i "s/^DRIVE1=.*/DRIVE1=$DRIVE1" install_arch_linux2.sh
+sed -i "s/^EFI=.*/EFI=$EFI
+DRIVE=$DRIVE
+DRIVE1=$DRIVE1/" install_arch_linux2.sh
 cp install_arch_linux2.sh /mnt/root
 echo "the second part of the install script is in the root directory 
 use <cd root> or <cd  > to get there with ls u can check if it is really there"

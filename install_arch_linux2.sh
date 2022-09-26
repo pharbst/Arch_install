@@ -6,7 +6,7 @@
 #    By: pharbst <pharbst@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/20 18:46:08 by pharbst           #+#    #+#              #
-#    Updated: 2022/09/26 05:02:05 by pharbst          ###   ########.fr        #
+#    Updated: 2022/09/26 05:09:43 by pharbst          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,18 +14,16 @@
 
 #!/bin/bash
 
-EFI=
+EFI=false
 DRIVE=
 DRIVE1=
 USER=
 
 
-pacman -S linux linux-headers linux-firmware nano base-devel openssh networkmanager wpa_supplicant wireless_tools netctl dialog lvm2 git wget ufw sudo << EOF
-
-EOF
+pacman -S linux linux-headers linux-firmware nano base-devel openssh networkmanager wpa_supplicant wireless_tools netctl dialog lvm2 git wget ufw sudo
 hwclock --systohc
-read -p "Enter your computername/hostname default=localhost: " HOSTNAME
-HOSTNAME=${HOSTNAME:-localhost}
+read -p "Enter your computername/hostname default=Archlinux: " HOSTNAME
+HOSTNAME=${HOSTNAME:-Archlinux}
 echo $HOSTNAME > /etc/hostname
 echo "127.0.0.1	localhost
 ::1		localhost
@@ -38,7 +36,7 @@ sed -i -e 's/^HOOKS.*/HOOKS=(base udev autodetect modconf block lvm2 filesystems
 mkinitcpio -p linux
 sed -i -e 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen
 locale-gen
-read -p "Enter a username default=user" USER
+read -p "Enter a username only lowercase letters allowed default=user: " USER
 USER=${USER:-user}
 useradd -m -g users -G wheel $USER
 echo "enter sudo password"
