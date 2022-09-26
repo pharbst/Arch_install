@@ -6,7 +6,7 @@
 #    By: pharbst <pharbst@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/18 19:09:13 by pharbst           #+#    #+#              #
-#    Updated: 2022/09/26 04:02:02 by pharbst          ###   ########.fr        #
+#    Updated: 2022/09/26 04:56:32 by pharbst          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,20 +19,9 @@
 #depending on the hardware and internetconnection the key refresh for pacman could take up to 1h grap yourself a cup of coffe and make yourself comfortable
 
 
-EFI="false"					#set to true if you can use efi
-DRIVE=						#path to Drive
-DRIVE1=$DRIVE'1'			#path to drive 1st partition normally its the path to drive with a 1 or p1 added at the end
-DRIVE2=$DRIVE'2'			#path to drive 1st partition normally its the path to drive with a 2 or p2 added at the end 
-VGNAME1="volgroup0"			#name of the volumegroup
-LVNAMEROOT="lv_root"		#name of the logical volume for the root directory // keep in mind that that is the space where you install your programms so it shouldn't be smaller than 30 GB also depends what you wanna do with the os
-ROOTSPACE="30GB"			#size of the root directory
-HOMESPACE="100%FREE"
-LVNAMEHOME="lv_home"		#name of the logical volume for the home directory
-
-
 echo -e "set EFI boot to true if you are using modern hardware
 if you are using a VM or old hardware which is not EFI compatiple set EFI to false"
-read -p "EFI boot? (true/false): " EFI
+read -p "EFI boot? (true/false): " EFI && [[ $EFI == [t][r][u][e] ]] || [[ $EFI == [f][a][l][s][e] ]] || exit 1
 echo "set EFI to $EFI"
 read -p "pass the path to the drive you wanna install archlinux to example: /dev/sda: " DRIVE
 read -p "the disk $DRIVE will be completly formated all data will be lost. 
@@ -56,7 +45,8 @@ write
 EOF
 echo "$DRIVE1"
 pvcreate --dataalignment 1m $DRIVE1
-read -p "choose a name for the Volumegroup default=$VGNAME1: " VGNAME1
+read -p "choose a name for the Volumegroup default=volgroup0: " VGNAME1
+VGNAME1=${VGNAME1:-volgroup0}
 echo "creating volume group with name $VGNAME1 on disk $DRIVE1"
 vgcreate $VGNAME1 $DRIVE1
 fi
@@ -82,15 +72,20 @@ t
 write
 EOF
 pvcreate --dataalignment 1m $DRIVE2
-read -p "choose a name for the Volumegroup default=$VGNAME1: " VGNAME1
+read -p "choose a name for the Volumegroup default=volgroup0: " VGNAME1
+VGNAME1=${VGNAME1:-volgroup0}
 vgcreate $VGNAME1 $DRIVE2
 fi
 
-read -p "how much space do you need for the root directory? default=$ROOTSPACE: " ROOTSPACE
-read -p "choose a name for the root local volume default=$LVNAMEROOT: "	LVNAMEROOT
+read -p "choose a name for the root local volume default=lv_root: "	LVNAMEROOT
+LVNAMEROOT=${LVNAMEROOT:-lv_root}
+read -p "how much space do you need for the root directory? default=30GB: " ROOTSPACE
+ROOTSPACE=${ROOTSPACE:-30GB}
 lvcreate -L $ROOTSPACE $VGNAME1 -n $LVNAMEROOT
-read -p "how much space do you need for the home directory? default=$HOMESPACE: " ROOTSPACE
-read -p "choose a name for the home local volume default=$LVNAMEHOME: " LVNAMEHOME
+read -p "choose a name for the home local volume default=lv_home: " LVNAMEHOME
+LVNAMEHOME=${LVNAMEHOME:-lv_home}
+read -p "how much space do you need for the home directory? default=100%FREE: " HOMESPACE
+HOMESPACE=${HOMESPACE:-100%FREE}
 lvcreate -l $HOMESPACE $VGNAME1 -n $LVNAMEHOME
 modprobe dm_mod
 vgchange -ay
@@ -104,10 +99,17 @@ mount /dev/$VGNAME1/$LVNAMEROOT /mnt
 mkdir /mnt/home
 mkdir /mnt/etc
 mount /dev/$VGNAME1/$LVNAMEHOME /mnt/home
-# genfstab -U -p /mnt >> /mnt/etc/fstab
-# cat /mnt/etc/fstab
-# # pacman-key --refresh-keys							#uncomment when pacstrap fails or running an old iso restart machine before ruinning script again refreshing keys is timeconsuming can take up to 1h in a VM
-# pacstrap -i /mnt
-# # pacstrap -i /mnt base
-# cp install_arch_linux2.sh /mnt/root
-# arch-chroot /mnt
+genfstab -U -p /mnt >> /mnt/etc/fstab
+cat /mnt/etc/fstab
+pacstrap -i /mnt base << EOF
+
+EOF
+sed -i "s/^EFI=.*/EFI=$EFI/" install_arch_linux2.sh
+sed -i "s/^DRIVE=.*/DRIVE=$DRIVE/" install_arch_linux2.sh
+sed -i "s/^DRIVE1=.*/DRIVE1=$DRIVE1" install_arch_linux2.sh
+cp install_arch_linux2.sh /mnt/root
+echo "the second part of the install script is in the root directory 
+use <cd root> or <cd  > to get there with ls u can check if it is really there"
+arch-chroot /mnt
+umount -a
+reboot

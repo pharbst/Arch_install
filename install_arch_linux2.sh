@@ -6,7 +6,7 @@
 #    By: pharbst <pharbst@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/20 18:46:08 by pharbst           #+#    #+#              #
-#    Updated: 2022/09/22 02:29:05 by pharbst          ###   ########.fr        #
+#    Updated: 2022/09/26 05:02:05 by pharbst          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,17 +14,18 @@
 
 #!/bin/bash
 
-EFI=false
-DRIVE="/dev/sda"
-DRIVE1="/dev/sda1"
-
-SSHPORT="4242"							#set the port for ssh //command: ssh <username>@<ip> -p <port>
-HOSTNAME="Archlinux-test"				#computername
-USER=peter
+EFI=
+DRIVE=
+DRIVE1=
+USER=
 
 
-pacman -S linux linux-headers linux-firmware nano base-devel openssh networkmanager wpa_supplicant wireless_tools netctl dialog lvm2 git wget ufw sudo
+pacman -S linux linux-headers linux-firmware nano base-devel openssh networkmanager wpa_supplicant wireless_tools netctl dialog lvm2 git wget ufw sudo << EOF
+
+EOF
 hwclock --systohc
+read -p "Enter your computername/hostname default=localhost: " HOSTNAME
+HOSTNAME=${HOSTNAME:-localhost}
 echo $HOSTNAME > /etc/hostname
 echo "127.0.0.1	localhost
 ::1		localhost
@@ -37,8 +38,12 @@ sed -i -e 's/^HOOKS.*/HOOKS=(base udev autodetect modconf block lvm2 filesystems
 mkinitcpio -p linux
 sed -i -e 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen
 locale-gen
+read -p "Enter a username default=user" USER
+USER=${USER:-user}
 useradd -m -g users -G wheel $USER
+echo "enter sudo password"
 passwd
+echo "enter userpassword"
 passwd $USER
 EDITOR=nano
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/g' /etc/sudoers
