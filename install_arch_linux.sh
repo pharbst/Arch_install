@@ -1,24 +1,18 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    install_arch_linux.sh                              :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: pharbst <pharbst@student.42heilbronn.de    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2022/09/18 19:09:13 by pharbst           #+#    #+#              #
-#    Updated: 2022/09/28 02:01:12 by pharbst          ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 #!/bin/bash
 
-#RUNNING THE SCRIPT BLIND CAN RESULT IN UNWANTED DATA LOSS
-#READ ALL COMMENTS THEY CAN BE IMPORTANT AND CHANGE VARIABLES AS YOU NEED THEM
-#this script works only with a LAN connection
-#for install over wlan set up a internetconnection urself and run the script afterwards
-#depending on the hardware and internetconnection the key refresh for pacman could take up to 1h grap yourself a cup of coffe and make yourself comfortable
 
-
+pacman -Sy
+pacman -S --noconfirm dialog
+# dialog           --clear  "" 0 0 \
+#     --and-widget --clear "" 0 0 \
+#     --and-widget --clear "" 0 0 \
+#     --and-widget --clear "" 0 0 \
+#     --and-widget --clear "" 0 0 \
+#     --and-widget --clear "" 0 0 \
+#     --and-widget --clear "" 0 0 \
+#     --and-widget --clear "" 0 0 \
+#     --and-widget --clear "" 0 0 \
+#     --and-widget --clear "" 0 0 \
 echo -e "set EFI boot to true if you are using modern hardware
 if you are using a VM or old hardware which is not EFI compatiple set EFI to false"
 read -p "EFI boot? (true/false): " EFI && [[ $EFI == [t][r][u][e] ]] || [[ $EFI == [f][a][l][s][e] ]] || exit 1
@@ -33,6 +27,14 @@ LVNAMEHOME=${LVNAMEHOME:-lv_home}
 read -p "how much space do you need for the home directory? default=100%FREE: " HOMESPACE
 HOMESPACE=${HOMESPACE:-100%FREE}
 read -p "pass the path to the drive you wanna install archlinux to example: /dev/sda: " DRIVE
+if [ !$DRIVE ]
+then
+exit 1
+fi
+read -p "Enter your computername/hostname default=Archlinux: " HOSTNAME
+HOSTNAME=${HOSTNAME:-Archlinux}
+read -p "Enter a username only lowercase letters allowed default=user: " USER
+USER=${USER:-user}
 echo "set EFI to $EFI"
 echo "set vgname to $VGNAME1"
 echo "set lvrootname to $LVNAMEROOT with size $ROOTSPACE"
@@ -104,10 +106,11 @@ pacstrap -i /mnt base << EOF
 
 EOF
 sed -i "s/^EFI=.*/EFI=$EFI\nDRIVE=$DRIVE/" install_arch_linux2.sh
-cp install_arch_linux2.sh /mnt/root
-cp post_install_arch.sh /mnt/root
-echo "the second part of the install script is in the root directory 
-use <cd root> or <cd  > to get there with ls u can check if it is really there"
-arch-chroot /mnt
+echo "#!/bin/bash
+
+EFI=$EFI
+DRIVE=$DRIVE"
+cat install_arch_linux2.sh >> /mnt/root/instll_arch_linux.sh
+arch-chroot /mnt bash -c "cd root && bash install_arch_linux.sh"
 umount -a
 reboot

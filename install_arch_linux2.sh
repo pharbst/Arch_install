@@ -1,36 +1,13 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    install_arch_linux2.sh                             :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: pharbst <pharbst@student.42heilbronn.de    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2022/09/20 18:46:08 by pharbst           #+#    #+#              #
-#    Updated: 2022/09/28 02:00:18 by pharbst          ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-
-
-#!/bin/bash
-
-EFI=
 DRIVE1=$DRIVE'1'
 USER=
 
 
-read -p "Enter your computername/hostname default=Archlinux: " HOSTNAME
-HOSTNAME=${HOSTNAME:-Archlinux}
-read -p "Enter a username only lowercase letters allowed default=user: " USER
-USER=${USER:-user}
 pacman -S --noconfirm linux linux-headers linux-firmware nano base-devel openssh networkmanager wpa_supplicant wireless_tools netctl dialog lvm2 git wget ufw sudo
 hwclock --systohc
 echo $HOSTNAME > /etc/hostname
 echo "127.0.0.1	localhost
 ::1		localhostpeter
 127.0.1.1	$HOSTNAME" > /etc/hosts
-# ufw allow $SSHPORT
-# sed -i '13s/#Port22/Port$SSHPORT/' /etc/ssh/sshd_config
 systemctl enable sshd
 systemctl enable NetworkManager
 sed -i -e 's/^HOOKS.*/HOOKS=(base udev autodetect modconf block lvm2 filesystems keyboard fsck)/g' /etc/mkinitcpio.conf
